@@ -13,6 +13,7 @@ export class AssetManager {
       { alias: AssetAlias.UICommandUp, src: "/assets/ui/command-up.png" },
       { alias: AssetAlias.UICommandEvent, src: "/assets/ui/command-event.png" },
       { alias: AssetAlias.UIControlPlay, src: "/assets/ui/control-play.png" },
+      { alias: AssetAlias.UIControlStop, src: "/assets/ui/control-stop.png" },
       { alias: AssetAlias.Background, src: "/assets/background.png" },
       { alias: AssetAlias.HeroSkeleton, src: "/assets/chars/hero-ess.skel" },
       { alias: AssetAlias.HeroAtlas, src: "/assets/chars/hero-ess.atlas" },

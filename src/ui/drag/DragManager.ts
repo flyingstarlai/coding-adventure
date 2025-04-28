@@ -9,6 +9,7 @@ export class DragManager {
   private commandQueueManager: CommandQueueManager;
   private uiView: Container;
   private readonly uiArea: Rectangle;
+  private allowDrag = true;
 
   constructor(
     stage: Container,
@@ -55,7 +56,7 @@ export class DragManager {
   }
 
   private startDrag(button: CommandButton, event: FederatedPointerEvent) {
-    if (!this.isInteractionEnabled()) {
+    if (!this.isInteractionEnabled() || !this.allowDrag) {
       return;
     }
 
@@ -130,5 +131,9 @@ export class DragManager {
       x <= globalPos.x + this.commandQueueView.width &&
       y <= globalPos.y + this.commandQueueView.height
     );
+  }
+
+  public setDragEnabled(enabled: boolean) {
+    this.allowDrag = enabled;
   }
 }

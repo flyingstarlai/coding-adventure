@@ -134,6 +134,7 @@ export class GameScene implements Scene {
 
     this.uiScene.init(
       () => this.commandRunner.start(),
+      () => this.commandRunner.stop(),
       () => this.resetLevel(),
     );
 
@@ -142,6 +143,16 @@ export class GameScene implements Scene {
       this.uiScene.getCommandQueueManager(),
       this.uiScene.getLevelResultPopup(),
     );
+
+    this.commandRunner.onPlayStart = () => {
+      this.uiScene.setPlayButtonPlaying(true);
+      this.uiScene.getDragManager().setDragEnabled(false);
+    };
+
+    this.commandRunner.onPlayEnd = () => {
+      this.uiScene.setPlayButtonPlaying(false);
+      this.uiScene.getDragManager().setDragEnabled(true);
+    };
 
     this.world.addSystem(this.commandRunner);
     this.world.addSystem(new HeroFallSystem([this.heroEntity]));

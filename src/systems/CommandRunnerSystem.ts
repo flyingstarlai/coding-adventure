@@ -16,6 +16,9 @@ export class CommandRunnerSystem extends System {
   private waitingForMove = false;
   private levelResultPopup: LevelResultPopup;
 
+  public onPlayStart?: () => void;
+  public onPlayEnd?: () => void;
+
   constructor(
     entities: Entity[],
     queueManager: CommandQueueManager,
@@ -34,6 +37,12 @@ export class CommandRunnerSystem extends System {
     this.isPlaying = true;
     this.hasStarted = true;
     this.waitingForMove = false;
+
+    this.onPlayStart?.();
+  }
+
+  stop() {
+    console.log("CommandRunnerSystem stopped", this.commands);
   }
 
   update(_delta: number): void {
@@ -121,6 +130,8 @@ export class CommandRunnerSystem extends System {
     this.hasStarted = false;
     this.currentIndex = 0;
     this.waitingForMove = false;
+
+    this.onPlayEnd?.();
   }
 
   public isGameOver(): boolean {

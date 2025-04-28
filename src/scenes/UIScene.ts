@@ -208,4 +208,8 @@ export class UIScene {
       this.stopButton.visible = false;
     }
   }
+
+  public getDragManager(): DragManager {
+    return this.dragManager;
+  }
 }
