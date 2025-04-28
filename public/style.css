@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #000000;
+}
+
+#app {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#level-popup {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffe680; /* Light Yellow */
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    color: #333333;
+    font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', cursive, sans-serif;
+    font-size: 36px;
+    text-align: center;
+    z-index: 10;
+    animation: popupFade 0.4s ease-out;
+}
+
+@keyframes popupFade {
+    from { opacity: 0; transform: scale(0.8) translate(-50%, -50%); }
+    to { opacity: 1; transform: scale(1) translate(-50%, -50%); }
+}
+
+#popup-message {
+    margin-bottom: 30px;
+}
+
+#retry-button,
+#next-button {
+    font-size: 28px;
+    padding: 15px 30px;
+    margin: 15px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: #ffcc00; /* Bright yellow */
+    color: #333;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#retry-button:hover,
+#next-button:hover {
+    background: #ff9900; /* Slightly darker */
+    transform: scale(1.05);
+}
+
+#retry-button:active,
+#next-button:active {
+    transform: scale(0.95);
+}
