@@ -196,7 +196,6 @@ export class GameScene implements Scene {
   }
 
   public setGameOver(state: boolean) {
-    console.log("setInteractionEnabled", !state);
     this.uiScene.setInteractionEnabled(!state);
   }
 }

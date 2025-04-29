@@ -67,7 +67,7 @@ export class GridMovementSystem extends System {
           this.gridOffsetY,
         );
 
-        const moveSpeed = 120; // Pixels per second (adjust feel)
+        const moveSpeed = GameConstants.HERO_SPEED
         const baseMoveStep = (moveSpeed / 60) * delta;
 
         const dx = targetPos.x - pixelPos.x;

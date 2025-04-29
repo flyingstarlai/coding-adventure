@@ -44,7 +44,7 @@ export class UIScene {
     this.buttonManager = new ButtonManager();
   }
 
-  init(onPlayPressed: () => void, resetLevel: () => void): void {
+  init(onPlayPressed: () => void, onStopPressed: () => void, resetLevel: () => void): void {
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
 
@@ -151,9 +151,10 @@ export class UIScene {
       texture: AssetAlias.UIControlStop,
       x: this.uiView.width - 80,
       y: this.uiView.height * 0.25,
-      onPress: onPlayPressed,
+      onPress: onStopPressed,
     });
     this.stopButton.visible = false;
+    this.stopButton.setEnabled(true)
     this.uiView.addChild(this.stopButton);
 
     //  === Result Popup ===

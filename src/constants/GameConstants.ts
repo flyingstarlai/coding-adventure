@@ -7,6 +7,9 @@ export const GameConstants = {
   // === UI Layout ===
   UI_HEIGHT: 256,
   UI_ROW_COUNT: 2,
+
+  // === HERO ====
+  HERO_SPEED: 200,
   HERO_SCALE: 0.35,
   GROUND_OFFSET: 8,
 
