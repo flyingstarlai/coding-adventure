@@ -5,6 +5,7 @@ import { System } from "../core/System.ts";
 import { canMoveCommand } from "../utils/CollisionUtils.ts";
 import { LevelResultPopup } from "../ui/popup/LevelResultPopup.ts";
 import { LevelManager } from "../managers/LevelManager.ts";
+import { EventBus } from "../core/EventBus";
 
 export class CommandRunnerSystem extends System {
   private readonly entities: Entity[];
@@ -16,8 +17,6 @@ export class CommandRunnerSystem extends System {
   private waitingForMove = false;
   private levelResultPopup: LevelResultPopup;
 
-  public onPlayStart?: () => void;
-  public onPlayEnd?: () => void;
 
   constructor(
     entities: Entity[],
@@ -38,7 +37,7 @@ export class CommandRunnerSystem extends System {
     this.hasStarted = true;
     this.waitingForMove = false;
 
-    this.onPlayStart?.();
+    EventBus.emit("PlayStart", undefined)
   }
 
   stop() {
@@ -131,7 +130,7 @@ export class CommandRunnerSystem extends System {
     this.currentIndex = 0;
     this.waitingForMove = false;
 
-    this.onPlayEnd?.();
+    EventBus.emit("PlayEnd", undefined)
   }
 
   public isGameOver(): boolean {

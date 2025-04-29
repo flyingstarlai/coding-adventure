@@ -21,6 +21,7 @@ import { LevelData } from "../types/LevelData.ts";
 import { HeroFallSystem } from "../systems/HeroFallSystem.ts";
 import { clearInput } from "../utils/InputUtils.ts";
 import { GameConstants } from "../constants/GameConstants.ts";
+import { EventBus } from "../core/EventBus.ts";
 
 export class GameScene implements Scene {
   public container: Container;
@@ -36,6 +37,17 @@ export class GameScene implements Scene {
     this.app = app;
     this.container = new Container();
     this.world = new World();
+
+      // === Event Bus ===
+  EventBus.on("PlayStart", () => {
+    this.uiScene.setPlayButtonPlaying(true);
+    this.uiScene.getDragManager().setDragEnabled(false);
+  });
+
+  EventBus.on("PlayEnd", () => {
+    this.uiScene.setPlayButtonPlaying(false);
+    this.uiScene.getDragManager().setDragEnabled(true);
+  });
   }
 
   public init() {
@@ -198,4 +210,6 @@ export class GameScene implements Scene {
   public setGameOver(state: boolean) {
     this.uiScene.setInteractionEnabled(!state);
   }
+
+
 }
