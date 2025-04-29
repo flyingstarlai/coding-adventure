@@ -1,6 +1,7 @@
 import { Container } from "pixi.js";
 import { CommandType } from "../types/CommandType";
-import { CommandButton } from "../ui/buttons/CommandButton.ts"; // (left, right, up, down)
+import { CommandButton } from "../ui/buttons/CommandButton.ts";
+import { CommandStateSO } from "../states/CommandStateSO.ts"; // (left, right, up, down)
 
 interface CommandQueueManagerOptions {
   width: number;
@@ -15,7 +16,6 @@ export class CommandQueueManager {
 
   private readonly height: number;
   private readonly spacing: number;
-  private isInteractionEnabled: () => boolean = () => true;
 
   constructor(options: CommandQueueManagerOptions) {
     this.container = new Container();
@@ -45,10 +45,6 @@ export class CommandQueueManager {
     }
   }
 
-  getFirstButton(): CommandButton | undefined {
-    return this.commandButtons.length > 0 ? this.commandButtons[0] : undefined;
-  }
-
   getDragButtonInsertIndex(ghostX: number): number {
     for (let i = 0; i < this.commandButtons.length; i++) {
       const button = this.commandButtons[i];
@@ -62,8 +58,6 @@ export class CommandQueueManager {
   }
 
   addExistingCommand(button: CommandButton, index?: number): CommandButton {
-    if (!this.isInteractionEnabled()) return button;
-
     const clone = button.cloneForQueue();
     this.container.addChild(clone);
 
@@ -75,6 +69,7 @@ export class CommandQueueManager {
       this.commands.push(button.commandType);
     }
 
+    CommandStateSO.getInstance().setCommands(this.commands);
     return clone;
   }
 
@@ -113,21 +108,7 @@ export class CommandQueueManager {
     return this.commandButtons.includes(button);
   }
 
-  highlightButtonAt(index: number): void {
-    this.commandButtons.forEach((button, i) => {
-      if (i === index) {
-        button.highlight();
-      } else {
-        button.unhighlight();
-      }
-    });
-  }
-
-  resetAllButtonHighlights(): void {
-    this.commandButtons.forEach((button) => button.unhighlight());
-  }
-
-  public setInteractionEnabled(getter: () => boolean): void {
-    this.isInteractionEnabled = getter;
+  getCommandButtons(): CommandButton[] {
+    return this.commandButtons;
   }
 }

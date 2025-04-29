@@ -1,7 +1,7 @@
 export interface GameEvents {
-    PlayStart: void;
-    PlayEnd: void;
-    LevelCompleted: void;
-    LevelFailed: void;
-  }
-  
+  EnergyCollected: number;
+  LevelCompleted: void;
+  LevelFailed: void;
+  HighlightCommand: number;
+  ResetHighlightCommand: void;
+}

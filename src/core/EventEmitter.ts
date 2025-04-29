@@ -1,35 +1,44 @@
-export type EventMap = {
-  PlayStart: void;
-  PlayEnd: void;
-  LevelCompleted: void;
-  LevelFailed: void;
-  EnergyCollected: { amount: number };
-};
+type EventReceiver<T> = (payload: T) => void;
 
-type EventKey = keyof EventMap;
-type EventReceiver<K extends EventKey> = (payload: EventMap[K]) => void;
+export class EventEmitter<EventMap extends Record<string, any>> {
+  private events: {
+    [K in keyof EventMap]?: EventReceiver<EventMap[K]>[];
+  } = {};
 
-export class EventEmitter {
-  private events: Partial<{ [K in EventKey]: EventReceiver<K>[] }> = {};
-
-  on<K extends EventKey>(event: K, callback: EventReceiver<K>): void {
+  on<K extends keyof EventMap>(
+    event: K,
+    callback: EventReceiver<EventMap[K]>,
+  ): void {
     if (!this.events[event]) {
       this.events[event] = [];
     }
-    (this.events[event] as EventReceiver<K>[]).push(callback);
+    this.events[event]!.push(callback);
   }
 
-  off<K extends EventKey>(event: K, callback: EventReceiver<K>): void {
+  off<K extends keyof EventMap>(
+    event: K,
+    callback: EventReceiver<EventMap[K]>,
+  ): void {
     const listeners = this.events[event];
-    if (!listeners) return;
-    this.events[event] = listeners.filter(cb => cb !== callback) as typeof listeners;
+    if (listeners) {
+      this.events[event] = listeners.filter(
+        (cb) => cb !== callback,
+      ) as EventReceiver<EventMap[K]>[];
+    }
   }
 
-  emit<K extends EventKey>(event: K, payload: EventMap[K]): void {
+  emit<K extends keyof EventMap>(event: K, payload: EventMap[K]): void {
     const listeners = this.events[event];
-    if (!listeners) return;
-    for (const cb of listeners) {
-      cb(payload);
+    if (listeners) {
+      listeners.forEach((callback) => {
+        callback(payload);
+      });
+    }
+  }
+
+  removeAllListeners<K extends keyof EventMap>(event: K): void {
+    if (this.events[event]) {
+      delete this.events[event];
     }
   }
 }

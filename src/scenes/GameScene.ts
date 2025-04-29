@@ -18,10 +18,9 @@ import { SpineSyncSystem } from "../systems/SpineSyncSystem.ts";
 import { CommandRunnerSystem } from "../systems/CommandRunnerSystem.ts";
 import { LevelManager } from "../managers/LevelManager.ts";
 import { LevelData } from "../types/LevelData.ts";
-import { HeroFallSystem } from "../systems/HeroFallSystem.ts";
 import { clearInput } from "../utils/InputUtils.ts";
 import { GameConstants } from "../constants/GameConstants.ts";
-import { EventBus } from "../core/EventBus.ts";
+import { UIEventManager } from "../managers/UIEventManager.ts";
 
 export class GameScene implements Scene {
   public container: Container;
@@ -37,17 +36,6 @@ export class GameScene implements Scene {
     this.app = app;
     this.container = new Container();
     this.world = new World();
-
-      // === Event Bus ===
-  EventBus.on("PlayStart", () => {
-    this.uiScene.setPlayButtonPlaying(true);
-    this.uiScene.getDragManager().setDragEnabled(false);
-  });
-
-  EventBus.on("PlayEnd", () => {
-    this.uiScene.setPlayButtonPlaying(false);
-    this.uiScene.getDragManager().setDragEnabled(true);
-  });
   }
 
   public init() {
@@ -78,6 +66,7 @@ export class GameScene implements Scene {
 
     // === UI Scene ===
     this.uiScene = new UIScene(this.app);
+    this.uiScene.init();
     this.container.addChild(this.uiScene.container);
 
     // === Hero Entity ===
@@ -144,43 +133,50 @@ export class GameScene implements Scene {
     );
     this.world.addSystem(new SpineSyncSystem([this.heroEntity]));
 
-    this.uiScene.init(
-      () => this.commandRunner.start(),
-      () => this.commandRunner.stop(),
-      () => this.resetLevel(),
-    );
-
-    this.commandRunner = new CommandRunnerSystem(
-      [this.heroEntity],
-      this.uiScene.getCommandQueueManager(),
-      this.uiScene.getLevelResultPopup(),
-    );
-
-    this.commandRunner.onPlayStart = () => {
-      this.uiScene.setPlayButtonPlaying(true);
-      this.uiScene.getDragManager().setDragEnabled(false);
-    };
-
-    this.commandRunner.onPlayEnd = () => {
-      this.uiScene.setPlayButtonPlaying(false);
-      this.uiScene.getDragManager().setDragEnabled(true);
-    };
-
+    this.commandRunner = new CommandRunnerSystem([this.heroEntity]);
     this.world.addSystem(this.commandRunner);
-    this.world.addSystem(new HeroFallSystem([this.heroEntity]));
+
+    // Event subscriber
+    UIEventManager.PlayButton.subscribe(() => this.handlePlayButton());
+    UIEventManager.StopButton.subscribe(() => this.handleStopButton());
+    UIEventManager.ContinueButton.subscribe(() => this.handleContinueButton());
+    UIEventManager.RetryButton.subscribe(() => this.handleRetryButton());
+  }
+
+  private handlePlayButton(): void {
+    this.commandRunner.start();
+    this.uiScene.setInteractionEnabled(false);
+  }
+
+  private handleStopButton(): void {
+    this.commandRunner.stop();
+    this.uiScene.setInteractionEnabled(true);
+  }
+
+  private handleContinueButton(): void {
+    console.log("Continuing...");
+    window.location.href = `?level=${LevelManager.nextLevel()}`;
+  }
+  private handleRetryButton(): void {
+    console.log("Retrying...");
+    this.resetLevel();
   }
 
   public destroy() {
+    this.uiScene.destroy();
     this.app.ticker.stop();
     this.container.destroy({ children: true });
+
+    UIEventManager.PlayButton.unsubscribe(() => this.handlePlayButton());
+    UIEventManager.StopButton.unsubscribe(() => this.handleStopButton());
+    UIEventManager.ContinueButton.unsubscribe(() =>
+      this.handleContinueButton(),
+    );
+    UIEventManager.RetryButton.unsubscribe(() => this.handleRetryButton());
   }
 
   update(delta: number) {
     this.world.update(delta);
-
-    if (this.commandRunner.isGameOver()) {
-      this.setGameOver(true);
-    }
   }
 
   private resetLevel(): void {
@@ -203,13 +199,8 @@ export class GameScene implements Scene {
 
       clearInput(input, actionState);
       this.commandRunner.reset();
-      this.setGameOver(false);
+      this.uiScene.setPlayButtonPlaying(false);
+      this.uiScene.setInteractionEnabled(true);
     }
   }
-
-  public setGameOver(state: boolean) {
-    this.uiScene.setInteractionEnabled(!state);
-  }
-
-
 }

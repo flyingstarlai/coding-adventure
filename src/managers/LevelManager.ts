@@ -66,10 +66,11 @@ export class LevelManager {
     }
   }
 
-  static nextLevel(): void {
+  static nextLevel(): number {
     if (this.currentLevelIndex < this.levels.length - 1) {
       this.currentLevelIndex++;
     }
+    return this.currentLevelIndex + 1;
   }
 
   static reset(): void {

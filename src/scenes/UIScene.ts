@@ -7,8 +7,11 @@ import { ButtonManager } from "../ui/buttons/ButtonManager.ts";
 import { ButtonSprite } from "../ui/buttons/ButtonSprite.ts";
 import { GameConstants } from "../constants/GameConstants.ts";
 import { LevelResultPopup } from "../ui/popup/LevelResultPopup.ts";
+import { UIEventManager } from "../managers/UIEventManager.ts";
+import { GameEventManager } from "../managers/GameEventManager.ts";
+import { Scene } from "../managers/SceneManager.ts";
 
-export class UIScene {
+export class UIScene implements Scene {
   public container: Container;
   private app: Application;
 
@@ -44,7 +47,7 @@ export class UIScene {
     this.buttonManager = new ButtonManager();
   }
 
-  init(onPlayPressed: () => void, onStopPressed: () => void, resetLevel: () => void): void {
+  init(): void {
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
 
@@ -141,7 +144,10 @@ export class UIScene {
       texture: AssetAlias.UIControlPlay,
       x: this.uiView.width - 80,
       y: this.uiView.height * 0.25,
-      onPress: onPlayPressed,
+      onPress: () => {
+        this.setPlayButtonPlaying(true);
+        UIEventManager.PlayButton.emit();
+      },
     });
     this.updatePlayButtonEnabled();
     this.uiView.addChild(this.playButton);
@@ -151,23 +157,67 @@ export class UIScene {
       texture: AssetAlias.UIControlStop,
       x: this.uiView.width - 80,
       y: this.uiView.height * 0.25,
-      onPress: onStopPressed,
+      onPress: () => {
+        this.setPlayButtonPlaying(false);
+        UIEventManager.StopButton.emit();
+      },
     });
     this.stopButton.visible = false;
-    this.stopButton.setEnabled(true)
+    this.stopButton.setEnabled(true);
     this.uiView.addChild(this.stopButton);
 
     //  === Result Popup ===
     this.levelResultPopup = new LevelResultPopup(
-      () => resetLevel(),
       () => {
-        window.location.href = `?level=${2}`;
+        this.setEnableButton(true);
+        UIEventManager.RetryButton.emit();
       },
+      () => {
+        this.setEnableButton(true);
+        UIEventManager.ContinueButton.emit();
+      },
+    );
+
+    // === Event Listener ===
+    GameEventManager.LevelCompleted.subscribe(() => this.handleLevelComplete());
+    GameEventManager.LevelFailed.subscribe(() => this.handleLevelFailed());
+    GameEventManager.HighlightCommand.subscribe((index: number) =>
+      this.handleHighlightCommand(index),
+    );
+    GameEventManager.ResetHighlightCommand.subscribe(() =>
+      this.handleResetHighlightCommand(),
     );
   }
 
-  getCommandQueueManager(): CommandQueueManager {
-    return this.commandQueueManager;
+  private setEnableButton(enable: boolean): void {
+    this.playButton.setEnabled(enable);
+    this.stopButton.setEnabled(enable);
+  }
+
+  private handleHighlightCommand(index: number) {
+    this.commandQueueManager.getCommandButtons().forEach((button, i) => {
+      if (i === index) {
+        button.highlight();
+      } else {
+        button.unhighlight();
+      }
+    });
+  }
+
+  private handleResetHighlightCommand() {
+    this.commandQueueManager
+      .getCommandButtons()
+      .forEach((button) => button.unhighlight());
+  }
+
+  private handleLevelComplete(): void {
+    this.setEnableButton(false);
+    this.levelResultPopup.showWin();
+  }
+
+  private handleLevelFailed(): void {
+    this.setEnableButton(false);
+    this.levelResultPopup.showLose();
   }
 
   updatePlayButtonEnabled(): void {
@@ -176,10 +226,6 @@ export class UIScene {
     } else {
       this.playButton.setEnabled(false);
     }
-  }
-
-  getLevelResultPopup(): LevelResultPopup {
-    return this.levelResultPopup;
   }
 
   public isInteractionEnabled(): boolean {
@@ -194,10 +240,6 @@ export class UIScene {
     for (const button of this.sourceButtons) {
       button.sprite.eventMode = enabled ? "static" : "none";
     }
-
-    this.commandQueueManager.setInteractionEnabled(
-      () => this.interactionEnabled,
-    );
   }
 
   public setPlayButtonPlaying(isPlaying: boolean): void {
@@ -210,7 +252,17 @@ export class UIScene {
     }
   }
 
-  public getDragManager(): DragManager {
-    return this.dragManager;
+  public destroy(): void {
+    GameEventManager.LevelCompleted.unsubscribe(() =>
+      this.handleLevelComplete(),
+    );
+    GameEventManager.LevelFailed.unsubscribe(() => this.handleLevelFailed());
+    GameEventManager.HighlightCommand.unsubscribe((index: number) =>
+      this.handleHighlightCommand(index),
+    );
+    GameEventManager.ResetHighlightCommand.unsubscribe(() =>
+      this.handleResetHighlightCommand(),
+    );
+    this.container.destroy({ children: true });
   }
 }

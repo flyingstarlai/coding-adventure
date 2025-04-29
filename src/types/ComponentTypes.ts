@@ -7,7 +7,6 @@ import { SpriteRenderer } from "../components/SpriteRenderer.ts";
 import { GridPosition } from "../components/GridPosition.ts";
 import { MoveTarget } from "../components/MoveTarget.ts";
 import { Facing } from "../components/Facing.ts";
-import { FallState } from "../components/FallState.ts";
 
 export interface ComponentTypes {
   Position: Position;
@@ -19,5 +18,4 @@ export interface ComponentTypes {
   GridPosition: GridPosition;
   MoveTarget: MoveTarget;
   Facing: Facing;
-  FallState: FallState;
 }
